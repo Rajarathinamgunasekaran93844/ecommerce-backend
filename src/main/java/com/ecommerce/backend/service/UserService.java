@@ -1,34 +1,27 @@
 package com.ecommerce.backend.service;
 
 import com.ecommerce.backend.model.User;
+import com.ecommerce.backend.model.SignupRequest;
 import com.ecommerce.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserService {
 
     @Autowired
-    private UserRepository repo;
+    private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public String register(User user){
+    public User registerUser(SignupRequest request) {
 
-        if(repo.existsByEmail(user.getEmail()))
-            return "Email already exists ❌";
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        repo.save(user);
-
-        return "Signup Successful ✔";
-    }
-
-    public List<User> getAllUsers(){
-        return repo.findAll();
+        return userRepository.save(user);
     }
 }
